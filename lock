@@ -6,6 +6,16 @@
 # scrot
  
 IMAGE=/tmp/i3lock.png
+LOCKIMAGE=$HOME/.config/fancylock/lock.png
+
+#Define displays where lock icon will be drawn in your display setusps. Note that icon will be drawn only to one display in multimonitor setups. 
+DISP_PRIO=( LVDS1 DP2)
+
+#Use these to adjust pic & text positions
+TEXTCORHOR=50
+TEXTCORVER=0
+IMGCORHOR=0
+IMGCORVER=-105
  
 # All options are here: http://www.imagemagick.org/Usage/blur/#blur_args
 #BLURTYPE="0x5" # 7.52s
@@ -14,7 +24,57 @@ IMAGE=/tmp/i3lock.png
 BLURTYPE="2x8" # 2.90s
 #BLURTYPE="2x3" # 2.92s
 
+activeDisplays=`xrandr --query | grep -E "^(LVDS|DP|VGA|HDMI)[0-9] connected [0-9]{3,4}x[0-9]{3,4}" | cut -d\  -f1`
+
+for disp in $activeDisplays
+do
+	for priorised in ${DISP_PRIO[@]}
+	do
+
+		if [ "${priorised}" != "${disp}" ]; then
+			continue;
+		fi
+		primaryDisp=$disp
+		break;
+	done
+
+	if [[ "$primaryDisp" == '' ]]; then
+		continue;
+	fi
+	break;
+done
+
+#If display is something not defined, then launch i3lock without lock icon
+if [ -z "${primaryDisp}" ]; then
+	echo 'primary not found'
+	scrot $IMAGE
+	convert $IMAGE -level 0%,100%,0.6 -blur $BLURTYPE $IMAGE
+	i3lock --textcolor=ffffff00 --insidecolor=ffffff1c --ringcolor=ffffff3e --linecolor=ffffff00 --keyhlcolor=00000080 --ringvercolor=00000000 --insidevercolor=0000001c --ringwrongcolor=00000055 --insidewrongcolor=0000001c  -i $IMAGE
+	rm $IMAGE
+	exit
+fi
+
+primaryResHoriz=`xrandr --query | grep -E "^(${primaryDisp}) connected [0-9]{3,4}x[0-9]{3,4}" | cut -d\  -f3 | cut -d+ -f1 | cut -dx -f1`
+primaryResVert=`xrandr --query | grep -E "^(${primaryDisp}) connected [0-9]{3,4}x[0-9]{3,4}" | cut -d\  -f3 | cut -d+ -f1 | cut -dx -f2`
+
+picHorSize=`identify $LOCKIMAGE | cut -d\  -f3 | cut -dx -f1`
+picVerSize=`identify $LOCKIMAGE | cut -d\  -f3 | cut -dx -f2`
+
+picLocHor=`expr ${primaryResHoriz} / 2 `
+picLocHor=`expr ${picLocHor} - ${picHorSize} / 2`
+picLocHor=`expr ${picLocHor} + ${IMGCORHOR}`
+
+
+picLocVer=`expr ${primaryResVert} / 2`
+
+textLocVer=`expr ${picLocVer} + ${picHorSize} / 2`
+textLocVer=`expr ${textLocVer} + ${TEXTCORVER}`
+textLocHor=`expr ${picLocHor} + ${TEXTCORHOR}`
+
+picLocVer=`expr ${picLocVer} - ${picVerSize} / 2`
+picLocVer=`expr ${picLocVer} + ${IMGCORVER}`
+
 scrot $IMAGE
-convert $IMAGE -level 0%,100%,0.6 -blur $BLURTYPE -font Liberation-Sans -pointsize 26 -fill white -gravity center -annotate +0+200 'Type password to unlock' - | composite -gravity center lock.png - $IMAGE
+convert $IMAGE -level 0%,100%,0.6 -blur $BLURTYPE -font Liberation-Sans -pointsize 26 -fill white -annotate +${textLocHor}+${textLocVer} "Type password to unlock" - | composite -geometry +${picLocHor}+${picLocVer} $LOCKIMAGE - $IMAGE
 i3lock --textcolor=ffffff00 --insidecolor=ffffff1c --ringcolor=ffffff3e --linecolor=ffffff00 --keyhlcolor=00000080 --ringvercolor=00000000 --insidevercolor=0000001c --ringwrongcolor=00000055 --insidewrongcolor=0000001c  -i $IMAGE
 rm $IMAGE
