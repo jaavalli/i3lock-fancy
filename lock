@@ -9,7 +9,7 @@ IMAGE=/tmp/i3lock.png
 LOCKIMAGE=$HOME/.config/fancylock/lock.png
 
 #Define displays where lock icon will be drawn in your display setusps. Note that icon will be drawn only to one display in multimonitor setups. 
-DISP_PRIO=( LVDS1 DP2)
+DISP_PRIO=( DP2 LVDS1)
 
 #Use these to adjust pic & text positions
 TEXTCORHOR=50
@@ -24,14 +24,13 @@ IMGCORVER=-105
 BLURTYPE="2x8" # 2.90s
 #BLURTYPE="2x3" # 2.92s
 
-activeDisplays=`xrandr --query | grep -E "^(LVDS|DP|VGA|HDMI)[0-9] connected [0-9]{3,4}x[0-9]{3,4}" | cut -d\  -f1`
+activeDisplays=`xrandr --query | grep -E "^(LVDS|DP||VGA|HDMI)[0-9] connected [0-9]{3,4}x[0-9]{3,4}" | cut -d\  -f1`
 
-for disp in $activeDisplays
+for priorised in ${DISP_PRIO[@]}
 do
-	for priorised in ${DISP_PRIO[@]}
+	for disp in $activeDisplays
 	do
-
-		if [ "${priorised}" != "${disp}" ]; then
+		if [ "${disp}" != "${priorised}" ]; then
 			continue;
 		fi
 		primaryDisp=$disp
@@ -43,6 +42,7 @@ do
 	fi
 	break;
 done
+
 
 #If display is something not defined, then launch i3lock without lock icon
 if [ -z "${primaryDisp}" ]; then
