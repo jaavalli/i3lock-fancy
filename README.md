@@ -13,7 +13,7 @@ Depends:
 
 Installation:
 cd i3lock-fancy
-./install.sh
+sudo ./install.sh
 
 Screenshot:
 

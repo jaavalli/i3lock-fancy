@@ -6,9 +6,9 @@
 # scrot
  
 IMAGE=/tmp/i3lock.png
-LOCKIMAGE=$HOME/.config/fancylock/lock.png
+LOCKIMAGE=/opt/i3lock-fancy/lock.png
 
-#Define displays where lock icon will be drawn in your display setusps. Note that icon will be drawn only to one display in multimonitor setups. 
+#Define displays where lock icon will be drawn in your display setups. Note that icon will be drawn only to one display in multimonitor setups. 
 DISP_PRIO=( DP2 LVDS1)
 
 #Use these to adjust pic & text positions
