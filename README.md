@@ -12,7 +12,9 @@ Depends:
 * Liberation Fonts
 
 Installation:
+
 cd i3lock-fancy
+
 sudo ./install.sh
 
 Screenshot:
